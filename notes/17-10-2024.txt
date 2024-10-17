@@ -1,0 +1,10 @@
+Started by creating the buildenv dockerfile and running:
+
+> docker build buildEnv -t custom-os-build-env
+
+in the the terminal.
+
+Once that has built, I ran:
+
+> docker run --rm -it -v "%cd%:/root/env" custom-os-build-env
+
