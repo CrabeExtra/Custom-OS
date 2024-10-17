@@ -1,0 +1,20 @@
+Credits to CodePulse on youtube. I'm basing this off of their tutorial:
+
+"Write Your Own 64-bit Operating System Kernel #2 - Stack, long mode and printing using C code.
+
+
+Refer to notes\17-10-2024.txt for build and run instructions.
+
+Summary overview:
+
+- \build holds on the build files.
+- dist\x86_64 containes the iso to mount onto the virtual or actual machine.
+- buildEnv is docker stuff for creating a build environment
+- notes are my notes while coding here
+- Makefile is what the buildEnv uses as instructions while building the code
+- src (the code)
+    - impl (implementation code)
+        - c implementation code
+        - \x86_64\boot has all the assembly language
+    - intf
+        - c interface code

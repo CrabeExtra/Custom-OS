@@ -8,3 +8,16 @@ Once that has built, I ran:
 
 > docker run --rm -it -v "%cd%:/root/env" custom-os-build-env
 
+Which connected me to an instance of my build.
+
+From there, I can run:
+
+> make build-x86_64
+
+This builds the iso containing the OS.
+
+Then, on a new cmd or after exiting the instance, with qemu installed and added to path, I run:
+
+> qemu-system-x86_64 -cdrom dist/x86_64/kernel.iso
+
+to run the created iso in a VM environment.

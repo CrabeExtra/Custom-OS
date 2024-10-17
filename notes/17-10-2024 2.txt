@@ -1,0 +1,22 @@
+https://www.docker.com/blog/cross-compiling-rust-code-for-multiple-architectures/
+
+^^ care this for when/if I want to modify or recreate this in rust.
+Develop a Shell:
+Implement a simple command-line shell. This will allow users to execute commands and interact with the system.
+
+ideas for later:
+
+File System:
+Start thinking about implementing a simple file system to read and write data persistently.
+
+Memory Management:
+Explore creating a basic memory manager, allowing for dynamic memory allocation.
+
+Multi-tasking:
+Implement basic process management and scheduling to allow for running multiple processes.
+
+Shell:
+Create a basic shell for interacting with the OS.
+
+GUI: 
+Implement a basic GUI.
