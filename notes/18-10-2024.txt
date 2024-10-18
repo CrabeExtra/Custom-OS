@@ -1,0 +1,6 @@
+So 
+- Docker is obviously an environment VM management tool to hold a build env that includes:
+    - NASM is used to support compiling assembly
+    - Grub is used to support multi-boot (x86_64)
+    - xorriso is used for generating the ISO image
+    - make is a build automation tool that puts everything else together. (HENCE Makefile)
