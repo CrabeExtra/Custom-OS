@@ -10,6 +10,11 @@ CARGO_BUILD := cargo build --release --target=$(RUST_TARGET)
 X86_64_ASM_SOURCE_FILES := $(shell find src/impl/x86_64 -name *.asm)
 X86_64_ASM_OBJECT_FILES := $(patsubst src/impl/x86_64/%.asm, build/x86_64/%.o, $(X86_64_ASM_SOURCE_FILES))
 
+# Rule to compile assembly files
+$(BUILD_DIR)/x86_64/%.o: src/impl/x86_64/%.asm
+	@mkdir -p $(dir $@)
+	nasm -f elf64 $< -o $@
+
 .PHONY: build-x86_64
 
 build-x86_64: $(X86_64_ASM_OBJECT_FILES)
@@ -17,11 +22,10 @@ build-x86_64: $(X86_64_ASM_OBJECT_FILES)
 	$(CARGO_BUILD)
 
 	# Step 2: Compile assembly files with NASM
-	@mkdir -p $(BUILD_DIR)
-	nasm -f elf64 src/impl/x86_64/boot.asm -o $(BUILD_DIR)/boot.o
+	ld -n -o $(ISO_DIR)/kernel.bin -T targets/x86_64/linker.ld $(X86_64_ASM_OBJECT_FILES) target/$(RUST_TARGET)/release/libcustom_os_rust.a
 
 	# Step 3: Link the kernel including Rust's binary
-	ld -n -o $(ISO_DIR)/kernel.bin -T targets/x86_64/linker.ld $(BUILD_DIR)/boot.o targets/$(RUST_TARGET)/release/libyourkernel.a
+	ld -n -o $(ISO_DIR)/kernel.bin -T targets/x86_64/linker.ld $(BUILD_DIR)/x86_64/boot/main.o target/$(RUST_TARGET)/release/libcustom_os_rust.a
 
 	# Step 4: Prepare the ISO directory
 	@mkdir -p targets/x86_64/iso/boot/grub
@@ -31,13 +35,9 @@ build-x86_64: $(X86_64_ASM_OBJECT_FILES)
 	@cp grub.cfg targets/x86_64/iso/boot/grub/grub.cfg
 
 	# Step 6: Create the ISO using GRUB
-	grub-mkrescue -o $(ISO_DIR)/youros.iso targets/x86_64/iso
-
-# Rule to compile assembly files
-$(BUILD_DIR)/x86_64/%.o: src/impl/x86_64/%.asm
-	@mkdir -p $(dir $@)
-	nasm -f elf64 $< -o $@
+	grub-mkrescue -o $(ISO_DIR)/kernel.iso targets/x86_64/iso
 
 # Clean up build artifacts
 clean:
 	$(BUILD_DIR) $(ISO_DIR)
+	

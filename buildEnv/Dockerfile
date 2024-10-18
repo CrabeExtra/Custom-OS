@@ -10,9 +10,9 @@ RUN apt-get install -y curl
 RUN apt-get install -y cargo
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 ENV PATH="/root/.cargo/bin:${PATH}"
-RUN rustup target add x86_64-unknown-none
 RUN rustup toolchain install nightly
 RUN rustup default nightly
+RUN rustup target add x86_64-unknown-none
 
 
 # Install Rust
