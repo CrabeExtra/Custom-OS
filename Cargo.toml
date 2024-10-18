@@ -1,0 +1,21 @@
+[package]
+name = "custom-os-rust"
+version = "0.0.1"
+authors = ["Jude Bradbury judebb4@gmail.com"]
+edition = "N/A"
+
+# Disabling the standard library for no_std
+[dependencies]
+compiler_builtins = { version = "0.1", features = ["mem"] }
+rlibc = "1.0"
+
+[build-dependencies]
+
+[profile.dev]
+panic = "abort"
+
+[profile.release]
+panic = "abort"
+
+[build]
+target = "x86_64-unknown-none"
