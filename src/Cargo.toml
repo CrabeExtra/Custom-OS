@@ -1,8 +1,8 @@
 [package]
 name = "custom-os-rust"
-version = "0.0.1"
+version = "0.1.0"
 authors = ["Jude Bradbury judebb4@gmail.com"]
-edition = "N/A"
+edition = "2021"
 
 # Disabling the standard library for no_std
 [dependencies]

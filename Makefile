@@ -21,7 +21,7 @@ build-x86_64: $(X86_64_ASM_OBJECT_FILES)
 	nasm -f elf64 src/impl/x86_64/boot.asm -o $(BUILD_DIR)/boot.o
 
 	# Step 3: Link the kernel including Rust's binary
-	ld -n -o $(ISO_DIR)/kernel.bin -T targets/x86_64/linker.ld $(BUILD_DIR)/boot.o target/$(RUST_TARGET)/release/libyourkernel.a
+	ld -n -o $(ISO_DIR)/kernel.bin -T targets/x86_64/linker.ld $(BUILD_DIR)/boot.o targets/$(RUST_TARGET)/release/libyourkernel.a
 
 	# Step 4: Prepare the ISO directory
 	@mkdir -p targets/x86_64/iso/boot/grub
