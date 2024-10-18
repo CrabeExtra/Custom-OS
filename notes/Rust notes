@@ -1,1 +1,5 @@
+docker build buildEnv -t custom-os-build-env-rust
+
 docker run --rm -it -v "%cd%:/root/env" custom-os-build-env-rust
+
+make build-x86_64
