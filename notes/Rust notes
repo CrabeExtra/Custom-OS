@@ -5,15 +5,16 @@ Plus cargo has a installable bootloader so creating the OS is much quicker.
 
 Having installed dependencies (you want bootloader 0.9.x, 10 or 11 will break):
 
-cargo build --target custom-os-x86_64.json
+> cargo build --target custom-os-x86_64.json
 
-cargo bootimage 
+> cargo bootimage 
 
-qemu-system-x86_64 -drive format=raw,file=target/custom-os-x86_64/debug/bootimage-kernel.bin
+> qemu-system-x86_64 -drive format=raw,file=target/custom-os-x86_64/debug/bootimage-kernel.bin
 
 Generating an ISO on linux or docker vm:
 
-cp target\custom-os-x86_64\debug\bootimage-kernel.bin iso/boot/
+> cp target\custom-os-x86_64\debug\bootimage-kernel.bin iso/boot/
 
-grub-mkrescue -o kernel.iso iso
+> grub-mkrescue -o kernel.iso iso
 
+Any docker image will do as long as grub is installed (see main branch for an example dockerfile to build an image out of.)
