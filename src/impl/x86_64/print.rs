@@ -1,3 +1,4 @@
+
 use crate::data::print_data::PrintColor;
 
 const NUM_COLS: usize = 80;

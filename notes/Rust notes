@@ -1,5 +1,16 @@
-docker build buildEnv -t custom-os-build-env-rust
+Not the same configuration as C at all. I tried to replicate the configuration, but it's too
+much effort.
 
-docker run --rm -it -v "%cd%:/root/env" custom-os-build-env-rust
+Plus cargo has a installable bootloader so creating the OS is much quicker.
 
-make build-x86_64
+Having installed dependencies (you want bootloader 0.9.x, 10 or 11 will break):
+
+cargo build --target custom-os-x86_64.json
+
+cargo bootimage 
+
+qemu-system-x86_64 -drive format=raw,file=target/custom-os-x86_64/debug/custom-os-x86_64.bin
+
+
+
+

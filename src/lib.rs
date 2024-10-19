@@ -1,13 +1,6 @@
 // defining my imports here.
 #![no_std]
-
-use core::panic::PanicInfo;
-
-#[panic_handler]
-fn panic(info: &PanicInfo) -> ! {
-    // Your panic handling code here, maybe logging the panic info or halting the system
-    loop {}
-}
+#![no_main]
 
 pub mod data {
     pub mod print_data;

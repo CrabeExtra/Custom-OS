@@ -1,57 +1,34 @@
-# I just know I'm going to not know how to re-write this.
-
-# Define variables for paths and tools
 RUST_TARGET := x86_64-unknown-none
 BUILD_DIR := build
 ISO_DIR := dist/x86_64
 
-CARGO_BUILD := cargo build --release --target=$(RUST_TARGET)
+# Find all Rust source files
+RS_SOURCE_FILES := $(shell find src -name '*.rs')
+RS_OBJECT_FILES := $(patsubst src/%.rs, $(BUILD_DIR)/%.o, $(RS_SOURCE_FILES))
 
-X86_64_ASM_SOURCE_FILES := $(shell find src/impl/x86_64 -name *.asm)
-X86_64_ASM_OBJECT_FILES := $(patsubst src/impl/x86_64/%.asm, build/x86_64/%.o, $(X86_64_ASM_SOURCE_FILES))
+# Find all assembly source files
+X86_64_ASM_SOURCE_FILES := $(shell find src/impl/x86_64 -name '*.asm')
+X86_64_ASM_OBJECT_FILES := $(patsubst src/impl/x86_64/%.asm, $(BUILD_DIR)/x86_64/%.o, $(X86_64_ASM_SOURCE_FILES))
 
-# Rule to compile assembly files
+# Compile Assembly
 $(BUILD_DIR)/x86_64/%.o: src/impl/x86_64/%.asm
 	@mkdir -p $(dir $@)
 	nasm -f elf64 $< -o $@
 
-$(X86_64_ASM_OBJECT_FILES): build/x86_64/%.o : src/impl/x86_64/%.asm
-	mkdir -p $(dir $@) && \
-	nasm -f elf64 $(patsubst build/x86_64/%.o, src/impl/x86_64/%.asm, $@) -o $@
+# Compile Rust
+$(BUILD_DIR)/%.o: src/%.rs
+	@mkdir -p $(dir $@)
+	rustc --emit=obj -o $@ --crate-type lib --target=$(RUST_TARGET) $<
 
-# .PHONY: build-x86_64
-# build-x86_64: $(kernel_object_files) $(x86_64_object_files)
-# 	mkdir -p dist/x86_64 && \
-# 	x86_64-elf-ld -n -o dist/x86_64/kernel.bin -T targets/x86_64/linker.ld $(kernel_object_files) $(x86_64_object_files) && \
-# 	cp dist/x86_64/kernel.bin targets/x86_64/iso/boot/kernel.bin && \
-# 	grub-mkrescue /usr/lib/grub/i386-pc -o dist/x86_64/kernel.iso targets/x86_64/iso
+# Combine all object files
+ALL_OBJECT_FILES := $(X86_64_ASM_OBJECT_FILES) $(RS_OBJECT_FILES)
 
-.PHONY: build-x86_64
+.PHONY: build-x86_64 clean
 
-build-x86_64: $(X86_64_ASM_OBJECT_FILES)
-	# Step 1: Compile the Rust project
-	$(CARGO_BUILD)
-
-
-	x86_64-elf-ld -n -o dist/x86_64/kernel.bin -T targets/x86_64/linker.ld $(X86_64_ASM_OBJECT_FILES) $()
-
-	# Step 2: Compile assembly files with NASM
-	ld -n -o $(ISO_DIR)/kernel.bin -T targets/x86_64/linker.ld $(X86_64_ASM_OBJECT_FILES) target/$(RUST_TARGET)/release/libcustom_os_rust.a
-
-	# Step 3: Link the kernel including Rust's binary
-	ld -n -o $(ISO_DIR)/kernel.bin -T targets/x86_64/linker.ld $(BUILD_DIR)/x86_64/boot/main.o target/$(RUST_TARGET)/release/libcustom_os_rust.a
-
-	# Step 4: Prepare the ISO directory
+# Build and link the kernel
+build-x86_64: $(ALL_OBJECT_FILES)
+	@mkdir -p $(ISO_DIR)
+	x86_64-elf-ld -n -o $(ISO_DIR)/kernel.bin -T targets/x86_64/linker.ld $(ALL_OBJECT_FILES)
 	@mkdir -p targets/x86_64/iso/boot/grub
-
-	# Step 5: Copy files to the ISO structure
 	@cp $(ISO_DIR)/kernel.bin targets/x86_64/iso/boot/kernel.bin
-	@cp grub.cfg targets/x86_64/iso/boot/grub/grub.cfg
-
-	# Step 6: Create the ISO using GRUB
-	grub-mkrescue -o $(ISO_DIR)/kernel.iso targets/x86_64/iso
-
-# Clean up build artifacts
-clean:
-	$(BUILD_DIR) $(ISO_DIR)
-	
+	grub-mkrescue /usr/lib/grub/i386-pc -o $(ISO_DIR)/kernel.iso targets/x86_64/iso
