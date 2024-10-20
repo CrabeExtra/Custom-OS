@@ -1,0 +1,41 @@
+Not the same configuration as C at all. I tried to replicate the configuration, but it's too
+much effort.
+
+Plus cargo has a installable bootloader so creating the OS is much quicker.
+
+Having installed dependencies (you want bootloader 0.9.x, 10 or 11 will break):
+
+> cargo build --target custom-os-x86_64.json
+
+> cargo bootimage 
+
+> qemu-system-x86_64 -drive format=raw,file=target/custom-os-x86_64/debug/bootimage-kernel.bin
+
+PUTTING ALL THESE INTO ONE STEP:
+
+> cargo run
+
+Generating an ISO on linux or docker vm:
+https://learn.microsoft.com/en-us/windows-server-essentials/install/create-a-bootable-usb-flash-drive 
+
+wipe a usb and prep it for bootable if you need to. ^^ 
+
+> cp target\custom-os-x86_64\debug\bootimage-kernel.bin iso/boot/
+
+> grub-mkrescue -o kernel.iso iso
+
+Any docker image will do as long as grub is installed (see main branch for an example dockerfile to build an image out of.)
+
+I've also included a grub-mkimage.exe if you can figure out how to use it. It's supposed to support grub commands on windows but 
+it's called via the filename and the flags are different.
+
+20-10-2024:
+
+I actually ran into issues using grub here (kernel.bin not found or multiboot header etc. when trying to boot from USB.)
+
+I'm programming from windows, so commands like: 
+> dd if=target/custom-os-x86_64/debug/bootimage-kernel.bin of=/dev/sdX && sync
+
+Didn't help. And I wasn't able to see the USB from docker. I'm sure I could have poured time into this,
+but save some time like I did, install rufus and just load the bootimage-kernel.bin directly from there to
+the USB. This immedately without any extra effort got the whole thing working for me.

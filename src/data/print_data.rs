@@ -1,4 +1,8 @@
+// feel free to steal code from the print_data.rs file here.
+// this is exactly the same between C and Rust.
 
+#[allow(dead_code)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
 pub enum PrintColor {
     Black = 0,

@@ -1,0 +1,10 @@
+Mapping of the VGA text buffer bits and the info they represent in x86_64:
+
+https://os.phil-opp.com/vga-text-mode/
+
+Bit(s)	Value
+0-7	    ASCII code point
+8-11	Foreground color
+12-14	Background color
+15	    Blink
+
