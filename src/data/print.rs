@@ -178,7 +178,7 @@ impl Writer {
      *      The problem is when my ~ <=10MB text heap reaches its max line limits 
      *      I need to safely loop it back to 0. and start again, wiping mem line-by-line
      *      procedurally. That process itself is efficient, but I have to refresh the window
-     *      literally anytime anything new is added to manage the moving buffer window.
+     *      literally anytime a new line is added to manage the moving buffer window.
      * 
      * it's actually big O(1) efficiency standalone (max 25 rows x 80 cols), 
      * but let's say I want to print n lines. Then it's 25 * 80 * n,
@@ -212,6 +212,9 @@ impl Writer {
         }
     }
 
+    /**
+     * clear row in just the VGA bytes
+     */
     fn clear_row(&mut self, row: usize) {
         let blank = ScreenChar {
             ascii_character: b' ',
@@ -221,7 +224,9 @@ impl Writer {
             self.buffer.chars[row][col].write(blank);
         }
     }
-
+    /**
+     * clear row in the larger mem heap
+     */
     fn clear_mem_row(&mut self, row: usize) {
         let blank = ScreenChar {
             ascii_character: b' ',
@@ -231,7 +236,10 @@ impl Writer {
             self.all_text.data[row][col]= blank;
         }
     }
-
+    /**
+     * just in case required.
+     * Resets the heap, the VGA bytes, and all associated writer fields.
+     */
     fn reset_heap(&mut self) {
         let blank = ScreenChar {
             ascii_character: b' ',
