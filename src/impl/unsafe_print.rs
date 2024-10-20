@@ -1,6 +1,8 @@
 
 use crate::data::print_data::PrintColor;
 
+// WARNING if you are copying my code, this is very depricated, see src/data/print.rs for better stuff.
+
 const NUM_COLS: usize = 80;
 const NUM_ROWS: usize = 25;
 
