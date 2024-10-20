@@ -307,13 +307,6 @@ pub fn print_u_64(u: u64) {
     write!(WRITER.lock(), "{}", u).unwrap();
 }
 
-pub fn print_num<T: Display>(items: &[T]) {
-    let mut writer = WRITER.lock();
-    for item in items {
-        write!(writer, "{}", item).unwrap();
-    }
-}
-
 // statics are initialised at compile time, but other variables (e.g. enum PrintColor)
 // are initialised during runtime, so lazy static is required to initialise this static
 // later on (when PrintColor is compiled and exists.)
