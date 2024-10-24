@@ -1,12 +1,14 @@
 
 
 use core::panic::PanicInfo;
-use x86_64::instructions::hlt;
+use bootloader::BootInfo;
 
-use crate::data::print::{clear, clear_row, print, print_int_32, set_colors};
+use crate::data::print::{ print, set_colors };
 use crate::data::print_data::PrintColor;
 use crate::println;
 use crate::lib::err::inits::{init, hlt_loop};
+
+entry_point!(_start);
 
 // syntax for compiling bytstrings; static HELLO: &[u8] = b"Hello World!";
 /// This function is called on panic.
@@ -28,8 +30,11 @@ pub extern "C" fn _start() -> ! {
 
     // invoke a breakpoint exception
     //x86_64::instructions::interrupts::int3();
+    use x86_64::registers::control::Cr3;
 
-    clear();
+    let (level_4_page_table, _) = Cr3::read();
+    println!("Level 4 page table at: {:?}", level_4_page_table.start_address());
+
     // Your Rust kernel initialization code here
     display_os();
     print("Welcome to Vessel (vessel for some of my programming that is)");

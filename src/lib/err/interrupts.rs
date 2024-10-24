@@ -126,7 +126,7 @@ impl InterruptIndex {
     }
 }
 
-
+// unused, just left this here in case useful.
 pub fn match_scan_to_key(scancode: u8) -> Option<char> {
     return match scancode {
         0x02 => Some('1'),
