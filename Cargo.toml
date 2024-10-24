@@ -1,5 +1,5 @@
 [package]
-name = "custom_os_rust"
+name = "vessel"
 version = "0.1.0"
 authors = ["Jude Bradbury judebb4@gmail.com"]
 edition = "2021"

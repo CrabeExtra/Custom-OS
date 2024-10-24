@@ -2,6 +2,7 @@
 #![no_main]
 #![feature(abi_x86_interrupt)]
 
+
 // defining my imports here.
 
 pub mod data {
@@ -12,6 +13,7 @@ pub mod data {
 pub mod lib {
     pub mod core {
         pub mod timing;
+        pub mod memory;
     }
     pub mod err {
         pub mod gdt;
