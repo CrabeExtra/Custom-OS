@@ -2,12 +2,15 @@
 
 use core::panic::PanicInfo;
 use bootloader::{ BootInfo, entry_point };
-use x86_64::structures::paging::Translate;
 
 use crate::data::print::{ print, set_colors };
 use crate::data::print_data::PrintColor;
 use crate::println;
-use crate::lib::err::inits::{init, hlt_loop};
+use crate::lib::err::inits::{init, hlt_loop, initialise_heap};  
+use crate::lib::threading::task::{Task, simple_executor::SimpleExecutor, executor::Executor};
+use crate::lib::threading::task::keyboard;
+
+extern crate alloc;
 
 entry_point!(kernel_main);
 
@@ -26,15 +29,17 @@ fn panic(info: &PanicInfo) -> ! {
 // just the standard entrypoint for background assembly.
 #[no_mangle]
 pub fn kernel_main(boot_info: &'static BootInfo) -> ! {
-    use x86_64::{structures::paging::Page, VirtAddr}; // new import
-    use crate::lib::core::memory;
-    init();
-    
-    // Your Rust kernel initialization code here
     display_os();
     print("Welcome to Vessel (vessel for some of my programming that is)");
     print("\n");
-    hlt_loop();
+    init();
+    
+    initialise_heap(boot_info);
+
+    let mut executor = Executor::new(); // new
+    executor.spawn(Task::new(example_task()));
+    executor.spawn(Task::new(keyboard::print_keypresses()));
+    executor.run();
 }
 
 fn display_os() {
@@ -43,5 +48,16 @@ fn display_os() {
     }
     print("VESSEL OS\n");
 }
+
+
+async fn async_number() -> u32 {
+    42
+}
+
+async fn example_task() {
+    let number = async_number().await;
+    println!("async number: {}", number);
+}
+
 
 

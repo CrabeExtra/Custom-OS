@@ -2,6 +2,7 @@
 #![no_main]
 #![feature(abi_x86_interrupt)]
 
+extern crate alloc;
 
 // defining my imports here.
 
@@ -14,11 +15,15 @@ pub mod lib {
     pub mod core {
         pub mod timing;
         pub mod memory;
+        pub mod allocator;
     }
     pub mod err {
         pub mod gdt;
         pub mod interrupts;
         pub mod inits;
+    }
+    pub mod threading {
+        pub mod task;
     }
 }
 

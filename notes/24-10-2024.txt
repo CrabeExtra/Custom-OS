@@ -1,5 +1,9 @@
 Mapping data to exact memory locations
 
+use x86_64::structures::paging::Translate;
+use x86_64::{structures::paging::Page, VirtAddr}; // new import
+use crate::lib::core::memory;
+
 let phys_mem_offset = VirtAddr::new(boot_info.physical_memory_offset);
 let mut mapper = unsafe { memory::init(phys_mem_offset) };
 let mut frame_allocator = unsafe {

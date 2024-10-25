@@ -6,7 +6,7 @@
 
 use volatile::Volatile;
 use core::fmt;
-use core::fmt::{Write, Display};
+use core::fmt::Write;
 use lazy_static::lazy_static;
 use spin::Mutex;
 
@@ -51,6 +51,7 @@ impl ScreenChar {
 }
 
 // Heap memory allocated to total text array.
+// Because this is static, it will use the same pre-allocated memory location for the entire duration that the operating system is online.
 static mut TEXT_MEMORY: [[ScreenChar; BUFFER_WIDTH]; TOTAL_HEIGHT] = [[ScreenChar { ascii_character: 0, color_code: ColorCode(0) }; BUFFER_WIDTH]; TOTAL_HEIGHT];
 
 // 2D Array Buffer, really nice way of representing the write position.
