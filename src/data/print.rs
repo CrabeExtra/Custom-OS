@@ -16,7 +16,7 @@ use crate::data::print_data::PrintColor;
 const BUFFER_HEIGHT: usize = 25;
 const BUFFER_WIDTH: usize = 80;
 
-const TOTAL_HEIGHT: usize = 60000; // approx bit less than ~10MB worth of RAM allocating here (assuming constant 80 width 2xu8 chars.)
+const TOTAL_HEIGHT: usize = 51; //60000; // approx bit less than ~10MB worth of RAM allocating here (assuming constant 80 width 2xu8 chars.)
 
 const NUM_RESERVED_INDICES: usize = 1;
 
@@ -86,6 +86,16 @@ pub struct Writer {
 }
 
 impl Writer {
+    // This is a bit inefficient as well
+    // I could find the row position of the vga buffer by offsetting by the row upper window
+    // TODO^^ but this is a bit of effort because of edge cases (it will mean I can set in all data, then 
+    // set directly in the buffer, then only have to update the exact spots instead of refresh the entire buffer).
+    pub fn update_cursor_color(&mut self, prev_col: usize, prev_row: usize) {
+        self.all_text.data[prev_row][prev_col].color_code = self.color_code;
+        self.all_text.data[self.row_position][self.column_position].color_code = ColorCode::new(PrintColor::Black, PrintColor::White);
+        self.refresh_window();
+    }
+
     // write a singular byte to the screen based on Writer cursor and byte.
     // TODO: I want to write another function that shifts the col to the right and wraps to the next line
     //       For cases when I want to be a ble to write a line and not overwrite the previous line.
@@ -108,23 +118,27 @@ impl Writer {
                     color_code,
                 };
 
-                // if row is out of the screen, write to the base of the screen
-                if row > BUFFER_HEIGHT - 1 || self.text_heap_full == 1 {
-                    self.buffer.chars[BUFFER_HEIGHT - 1][col].write(ScreenChar {
-                        ascii_character: byte,
-                        color_code,
-                    });
-                } else {
-                    // if row is within the screen, write to the position.
-                    self.buffer.chars[row][col].write(ScreenChar {
-                        ascii_character: byte,
-                        color_code,
-                    });
-                }
+                // add to the 'same' spot in the buffer
+                self.buffer.chars[self.get_buffer_row()][col].write(ScreenChar {
+                    ascii_character: byte,
+                    color_code,
+                });
                     
 
                 self.column_position += 1;
             }
+        }
+    }
+
+    fn get_buffer_row(&mut self) -> usize {
+        // case where it's within buffer
+        if self.row_window_upper <= self.row_position {
+            return self.row_position - self.row_window_upper;
+        
+            // case where upper window is below the row
+        } else {
+            // I did some maths here just trust it
+            return self.row_position + TOTAL_HEIGHT - self.row_window_upper;
         }
     }
 
@@ -272,6 +286,103 @@ impl Writer {
             }
 
         }
+    }
+    /**
+     * deletes a key.
+     */
+    pub fn backspace(&mut self) {
+
+        // produce required local vars
+        let blank = ScreenChar {
+            ascii_character: b' ',
+            color_code: self.color_code,
+        };
+        let row = self.row_position;
+        let col = self.column_position;
+        
+        // delete the current key
+        self.all_text.data[row][col] = blank;
+
+        //  shifts the window back 1
+        self.shift_back();
+    }
+
+    /**
+     * shifts back 1 char, handles edge cases.
+     */
+    pub fn shift_back(&mut self) {
+        // if cursor not at leftmost column, shift left.
+        self.shift_left();
+        
+        // if cursor not at topmost row, shift upwards.
+        self.shift_upwards();
+        
+    }
+
+    /**
+     * shifts forwards 1 char
+     */
+    pub fn shift_forwards(&mut self) {
+
+    }
+
+    pub fn shift_left(&mut self) {
+        let col = self.column_position;
+        let row = self.row_position;
+        if self.column_position > 0 {
+            self.column_position -= 1;
+        }
+        self.update_cursor_color(col, row);
+    }
+
+    // TODO update this to shift the entire buffer window up the text buffer.
+    pub fn shift_upwards(&mut self) {
+        let col = self.column_position;
+        let row = self.row_position;
+        if self.row_position > (self.row_window_upper + NUM_RESERVED_INDICES) {
+            self.row_position -= 1;
+        }
+        self.update_cursor_color(col, row);
+    }
+
+    pub fn shift_right(&mut self) {
+        let col = self.column_position;
+        let row = self.row_position;
+        if self.column_position < BUFFER_WIDTH - 1 {
+            self.column_position += 1;
+        }
+        self.update_cursor_color(col, row);
+    }
+    // Shifts the cursor downwards and handles edgecase:
+    // buffer (only if the newLine exists. Don't loop around or enter negative space).
+    pub fn shift_downwards(&mut self) {
+        let col = self.column_position;
+        let row = self.row_position;
+        // shift cursor down if all good to do so.
+        if self.row_position < (self.row_window_upper + (BUFFER_HEIGHT - 1)) {
+            self.row_position += 1;
+
+            // are we about to overtake the first_row? generate a newline.
+            // ERROR: here, resolve.
+        } else if self.first_row == (self.row_position + 1) || self.row_position == TOTAL_HEIGHT - 1 || self.column_position >= BUFFER_WIDTH - 1 {
+            
+            // do nothing
+            self.write_string("end of buffer");
+            // we're shifting the buffer window
+        } else {
+            self.write_string("shift");
+            self.shift_window_down();
+        }
+
+        self.update_cursor_color(col, row);
+    }
+
+    pub fn shift_window_down(&mut self) {
+        self.row_position += 1;
+
+        self.row_window_upper += 1; // shift the window down a row.
+
+        self.refresh_window(); 
     }
 }
 

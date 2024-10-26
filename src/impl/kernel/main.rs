@@ -34,11 +34,16 @@ pub fn kernel_main(boot_info: &'static BootInfo) -> ! {
     print("\n");
     init();
     
+    // initialise data heap
     initialise_heap(boot_info);
 
-    let mut executor = Executor::new(); // new
-    executor.spawn(Task::new(example_task()));
+    // create mutable async executor
+    let mut executor = Executor::new();
+
+    // spawn print_keypresses task (which runs forever)
     executor.spawn(Task::new(keyboard::print_keypresses()));
+    
+    // run tasks.
     executor.run();
 }
 

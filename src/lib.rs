@@ -25,6 +25,7 @@ pub mod lib {
     pub mod threading {
         pub mod task;
     }
+    pub mod shell;
 }
 
 
