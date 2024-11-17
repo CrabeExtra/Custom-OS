@@ -13,8 +13,8 @@ use spin::Mutex;
 use crate::data::print_data::PrintColor;
 
 // constants, ("ooh, but you could just import them from unsafe_print.rs", grow up mate)
-const BUFFER_HEIGHT: usize = 25;
-const BUFFER_WIDTH: usize = 80;
+pub const BUFFER_HEIGHT: usize = 25;
+pub const BUFFER_WIDTH: usize = 80;
 
 const TOTAL_HEIGHT: usize = 51; //60000; // approx bit less than ~10MB worth of RAM allocating here (assuming constant 80 width 2xu8 chars.)
 
@@ -341,6 +341,13 @@ impl Writer {
         let row = self.row_position;
         if self.row_position > (self.row_window_upper + NUM_RESERVED_INDICES) {
             self.row_position -= 1;
+        } else if self.row_position <= NUM_RESERVED_INDICES {
+            // do nothing for now.
+            // TODO: Implement circular shell height 
+            // TODO: (this only stops before hitting the starting line which may not be zero depending on circular text location)
+        }
+        else {
+            self.shift_window_up();
         }
         self.update_cursor_color(col, row);
     }
@@ -363,14 +370,17 @@ impl Writer {
             self.row_position += 1;
 
             // are we about to overtake the first_row? generate a newline.
-            // ERROR: here, resolve.
-        } else if self.first_row == (self.row_position + 1) || self.row_position == TOTAL_HEIGHT - 1 || self.column_position >= BUFFER_WIDTH - 1 {
-            
-            // do nothing
-            self.write_string("end of buffer");
+            //TODO, repair the following two cases, they lead to errors.
+        } else if self.row_position == TOTAL_HEIGHT - 1 { //self.column_position >= BUFFER_WIDTH - 1
+            // TODO: re-implement this, just commenting it out to work on other stuff for now.
+            // reset to start of buffer
+            // self.write_string("end of buffer");
+            // self.row_position = NUM_RESERVED_INDICES - 1;
+            // self.shift_window_down();
             // we're shifting the buffer window
+        // } else if self.first_row == (self.row_position + 1) {
+        //     self.new_line();
         } else {
-            self.write_string("shift");
             self.shift_window_down();
         }
 
@@ -383,6 +393,26 @@ impl Writer {
         self.row_window_upper += 1; // shift the window down a row.
 
         self.refresh_window(); 
+    }
+
+    pub fn shift_window_up(&mut self) {
+        self.row_position -= 1;
+
+        self.row_window_upper -= 1; // shift the window up a row.
+
+        self.refresh_window(); 
+    }
+
+    pub fn get_line_contents(&mut self) -> [u8; BUFFER_WIDTH] {
+        let row = self.row_position;
+        let mut contents: [u8; BUFFER_WIDTH] = [0x0; BUFFER_WIDTH];
+        let mut count = 0;
+        for c in self.all_text.data[row] {
+            contents[count] = c.ascii_character;
+            count += 1;
+        }
+        // TODO rewrite this to return &str
+        return contents;
     }
 }
 
